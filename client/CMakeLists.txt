@@ -1,1 +1,3 @@
-add_executable(client client.c)
+add_executable(client 
+  main.c
+)
