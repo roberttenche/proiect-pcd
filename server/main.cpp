@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -16,18 +17,47 @@
 
 #include <fcntl.h>
 
-#define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 42070
-int max(int x, int y)
+int max(int x, int y) { if (x > y) return x; else return y; }
+
+typedef struct connection
 {
-  if (x > y) return x;
-  else       return y;
+  pid_t child_pid;
+  int timeout;
+}connection_t;
+
+void sigusr1_handler(int sig_num, siginfo_t* si, void* ignored) {
+
+  switch (si->si_code)
+  {
+  case SI_USER: // signal received via kill()
+  {
+    printf("Child[%d]: Finished execution\n", si->si_pid);
+    fflush(stdout);
+    break;
+  }
+  
+  default:
+  {
+    printf("ERROR PROCESSING SINGAL: %d", sig_num);
+    break;
+  }
+  }
 }
 
 extern char** environ;
 
+connection_t* connections;
+int current_connections = 0;
+
 int main(int argc, char* argv[], char* envp[])
 {
+  connections = (connection_t*)malloc(1024*(sizeof(connection_t)));
+
+  struct sigaction sa;
+  sa.sa_sigaction = sigusr1_handler;
+  sa.sa_flags = SA_SIGINFO;
+  sigaction(SIGUSR1, &sa, NULL);
+
   int server_socket_fd_tcp, server_socket_fd_udp;
   int client_socket_fd, client_len;
   int max_fd;
@@ -86,14 +116,38 @@ int main(int argc, char* argv[], char* envp[])
       memset(buffer, 0, sizeof(buffer));
 
       int client_fd = accept(server_socket_fd_tcp, (struct sockaddr*)&client_addr, &len);
-      pid_t child_pid;
 
-      printf("Message From TCP client: ");
-      read(client_fd, buffer, sizeof(buffer));
+      pid_t child_pid = fork();
 
-      puts(buffer);
+      if (child_pid == 0)
+      {
+        // child
+        pid_t parent_pid = getppid();
 
-      write(client_fd, "Hello from server TCP!\n", 24);
+        close(server_socket_fd_tcp);
+
+        while(true)
+        {
+          printf("Child[%d]: ", getpid());
+          read(client_fd, buffer, sizeof(buffer));
+
+          printf("%s", buffer);
+
+          write(client_fd, "Hello from server TCP!\n", 24);
+
+          if (strncmp(buffer, "close", 5) == 0)
+          {
+            break;
+          }
+        }
+
+        close(client_fd);
+
+        // send signal that child finished processing request
+        kill(parent_pid, SIGUSR1);
+
+        exit(EXIT_SUCCESS);
+      }
 
       close(client_fd);
     }
@@ -114,6 +168,8 @@ int main(int argc, char* argv[], char* envp[])
 
       sendto(server_socket_fd_udp, "Hello from server UDP!\n", 24u, 0,
           (struct sockaddr*)&client_addr, sizeof(client_addr));
+
+      fflush(stdout);
     }
 
   }
