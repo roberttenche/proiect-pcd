@@ -12,6 +12,6 @@ cd ..
 # used more as a quiet dir create
 mkdir -p bin
 
-mv -f ./build/client/user ./bin/user
-mv -f ./build/client/admin ./bin/admin
-mv -f ./build/server/server ./bin/server
+mv -f ./build/client/user ./bin/user.app
+mv -f ./build/client/admin ./bin/admin.app
+mv -f ./build/server/server ./bin/server.app

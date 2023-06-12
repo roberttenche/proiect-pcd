@@ -4,6 +4,7 @@
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <signal.h>
 
 #include "sig_handler.hpp"
 #include "tcp_handler.hpp"
@@ -26,6 +27,8 @@ int current_connections = 0;
 int main(int argc, char* argv[], char* envp[])
 {
 
+  system("mkdir -p server/");
+
   if (init_sig_handlers() == -1)
   {
     printf("error initializing signal handlers\n");
@@ -38,9 +41,9 @@ int main(int argc, char* argv[], char* envp[])
   int client_socket_fd, client_len;
   int max_fd;
 
-  struct timeval timeout_tcp;
-  timeout_tcp.tv_sec = 5; // seconds
-  timeout_tcp.tv_usec = 0; // microseconds
+  // struct timeval timeout_tcp;
+  // timeout_tcp.tv_sec = 0xFFFFFFFF; // seconds
+  // timeout_tcp.tv_usec = 0; // microseconds
 
   fd_set file_descriptor_set;
   memset(&file_descriptor_set, 0, sizeof(fd_set));
@@ -57,10 +60,10 @@ int main(int argc, char* argv[], char* envp[])
     exit(EXIT_FAILURE);
   }
 
-  if (setsockopt(server_socket_fd_tcp, SOL_SOCKET, SO_RCVTIMEO, &timeout_tcp, sizeof(timeout_tcp)) < 0) {
-    printf("error adding tcp socket options\n");
-    exit(EXIT_FAILURE);
-  }
+  // if (setsockopt(server_socket_fd_tcp, SOL_SOCKET, SO_RCVTIMEO, &timeout_tcp, sizeof(timeout_tcp)) < 0) {
+  //   printf("error adding tcp socket options\n");
+  //   exit(EXIT_FAILURE);
+  // }
 
   memset(&server_addr, 0u, sizeof(server_addr));
   server_addr.sin_family = AF_INET;

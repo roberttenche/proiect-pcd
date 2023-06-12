@@ -1,7 +1,5 @@
 #pragma once
 
-#include <signal.h>
-
 // default value: false
 // will be set to true when interrupted by an signal handler
 extern bool interrupted_by_sig_handler;

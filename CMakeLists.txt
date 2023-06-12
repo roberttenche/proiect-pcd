@@ -3,12 +3,10 @@ cmake_minimum_required(VERSION 3.22.1)
 project( proiect-pcd )
 
 add_compile_definitions(
-  SERVER_IP="127.0.0.1"
+  SERVER_IP="192.168.174.48"
   SERVER_PORT=42069
+  MAX_LINE_SIZE=1024
 )
-
-# build libs
-add_subdirectory(lib-src)
 
 # build server
 add_subdirectory(server)

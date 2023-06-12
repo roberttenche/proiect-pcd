@@ -1,35 +1,17 @@
 #pragma once
 
-typedef enum user_type {
+#include <stdlib.h>
 
-  NONE = 0, // used for  initialization only
-
-  ADMIN = 1,
-  INET_USER = 2,
-  REST_USER = 3,
-
-  USER_COUNT  // do not delete, do not change
-
-} user_type_t;
-
-
+#define PROCESSING_TYPE_BLUR 1
+#define PROCESSING_TYPE_UPSCALE 2
+#define PROCESSING_TYPE_DOWNSCALE 4
 
 typedef struct header
 {
-
-  user_type_t usr_type;
-  int num_of_packets;
-
+  char file_extension[20];
+  size_t file_size;
+  unsigned char processing_type;
 } header_t;
-
-
-
-typedef struct packet
-{
-
-  char buffer[1024];
-
-} packet_t;
 
 // client -> server [header]
 // client <- server [ACK]

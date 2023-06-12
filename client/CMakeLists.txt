@@ -5,16 +5,14 @@ add_executable(user
 )
 
 target_include_directories(user PRIVATE
-  ${CMAKE_SOURCE_DIR}/lib-src/my_io
+  ${CMAKE_SOURCE_DIR}/common_types
   user/arg_parser
 )
 
 target_link_directories(user PRIVATE
-  ${CMAKE_SOURCE_DIR}/lib-src/my_io
 )
 
 target_link_libraries(user PRIVATE
-  my_io
 )
 
 ### ADMIN ###
