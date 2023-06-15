@@ -9,9 +9,8 @@ add_executable(server
   sig_handler/sig_handler.cpp
   tcp_handler/tcp_handler.cpp
   udp_handler/udp_handler.cpp
-  processing/blur/blur.cpp
-  processing/downscale/downscale.cpp
-  processing/upscale/upscale.cpp
+  processing/processing.cpp
+  my_timer/my_timer.cpp
 )
 
 target_include_directories(server PRIVATE
@@ -20,11 +19,11 @@ target_include_directories(server PRIVATE
   sig_handler
   tcp_handler
   udp_handler
-  processing/blur
-  processing/downscale
-  processing/upscale
+  processing
+  my_timer
 )
 
 target_link_libraries(server PRIVATE
   ${OpenCV_LIBS}
+  pthread
 )

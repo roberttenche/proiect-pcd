@@ -19,3 +19,16 @@ target_link_libraries(user PRIVATE
 add_executable(admin
   admin/admin.c
 )
+
+### GUI ###
+add_executable(gui
+  gui/gui.c
+  gui/user_shell.c
+)
+
+target_link_directories(gui PRIVATE
+)
+
+target_link_libraries(gui PRIVATE
+  pthread
+)

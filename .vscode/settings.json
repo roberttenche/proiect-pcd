@@ -31,6 +31,10 @@
     "string": "cpp",
     "system_error": "cpp",
     "ratio": "cpp",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "sstream": "c",
+    "chrono": "c",
+    "algorithm": "c",
+    "pthread.h": "c"
   }
 }

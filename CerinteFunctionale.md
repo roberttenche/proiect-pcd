@@ -2,13 +2,13 @@
 
 ## Server
 Permite:
-- un singur admin conectat la un moment dat
-- unul sau mai multi clienti normali INET socket TCP & UDP
-- unul sau mai multi clienti web SOAP / REST (OPTIONAL)
+- un singur admin conectat la un moment dat []
+- unul sau mai multi clienti normali INET socket TCP [X]
+- unul sau mai multi clienti web SOAP / REST (OPTIONAL) []
 
 Comunicare:
 - trebuie sa contina identificatori unici pentru fiecare tip de client e.q. admin, user INET, user web etc.
-- sincrona / asincrona pentru nivel B / C respectiv
+- sincrona / asincrona pentru nivel B / C respectiv [X]
 
 ## Admin
 Permite:

@@ -6,11 +6,11 @@
 #include <getopt.h> /* for getopt */
 
 static struct option opt_long[] = {
-  {"help",      no_argument,       0, 0},
-  {"file",      required_argument, 0, 0},
-  {"blur",      no_argument,       0, 0},
-  {"upscale",   no_argument,       0, 0},
-  {"downscale", no_argument,       0, 0}
+  {"help",      no_argument,             0, 0},
+  {"file",      required_argument,       0, 0},
+  {"blur",      required_argument,       0, 0},
+  {"upscale",   required_argument,       0, 0},
+  {"downscale", required_argument,       0, 0}
 };
 
 static void print_help();
@@ -23,7 +23,7 @@ void arg_parse(int argc, char* argv[], char* envp[], char** filePath, int* apply
   int opt_idx = 0;
 
   /* read all options and arguments form the command line*/
-  while ((opt = getopt_long(argc, argv, "hf:bud", opt_long, &opt_idx)) != -1)
+  while ((opt = getopt_long(argc, argv, "hf:b:u:d:", opt_long, &opt_idx)) != -1)
   {
     switch (opt)
     {
@@ -49,19 +49,25 @@ void arg_parse(int argc, char* argv[], char* envp[], char** filePath, int* apply
         /* --blur */
         if (opt_idx == 2)
         {
-          *apply_blur = 1;
+          /* strtol - non-deprecated way to convert from string to integer */
+          /*        - return 0 if no digits are provided to be converted   */
+          *apply_blur = strtol(optarg, NULL, 10);
         }
 
         /* --upscale */
         if (opt_idx == 3)
         {
-          *apply_upscale = 1;
+          /* strtol - non-deprecated way to convert from string to integer */
+          /*        - return 0 if no digits are provided to be converted   */
+          *apply_upscale = strtol(optarg, NULL, 10);
         }
 
         /* --downscale */
         if (opt_idx == 4)
         {
-          *apply_downscale = 1;
+          /* strtol - non-deprecated way to convert from string to integer */
+          /*        - return 0 if no digits are provided to be converted   */
+          *apply_downscale = strtol(optarg, NULL, 10);
         }
 
         break;
@@ -84,19 +90,25 @@ void arg_parse(int argc, char* argv[], char* envp[], char** filePath, int* apply
 
       case 'b':
       {
-        *apply_blur = 1;
+        /* strtol - non-deprecated way to convert from string to integer */
+        /*        - return 0 if no digits are provided to be converted   */
+        *apply_blur = strtol(optarg, NULL, 10);
         break;
       }
 
       case 'u':
       {
-        *apply_upscale = 1;
+        /* strtol - non-deprecated way to convert from string to integer */
+        /*        - return 0 if no digits are provided to be converted   */
+        *apply_upscale = strtol(optarg, NULL, 10);
         break;
       }
 
       case 'd':
       {
-        *apply_downscale = 1;
+        /* strtol - non-deprecated way to convert from string to integer */
+        /*        - return 0 if no digits are provided to be converted   */
+        *apply_downscale = strtol(optarg, NULL, 10);
         break;
       }
 

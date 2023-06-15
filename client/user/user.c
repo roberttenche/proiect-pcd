@@ -86,28 +86,29 @@ int main(int argc, char* argv[], char* envp[])
   strncpy(header.file_extension, getFileExtension(file_path), sizeof(header.file_extension));
   header.file_size = fileStat.st_size;
   
-  if (apply_blur == 1)
+  if (apply_blur >= 0)
   {
-    header.processing_type |= PROCESSING_TYPE_BLUR;
+    header.blur_multiplier = apply_blur;
   }
-  if (apply_upscale == 1)
+  if (apply_upscale >= 0)
   {
-    header.processing_type |= PROCESSING_TYPE_UPSCALE;
+    header.upscale_multiplier = apply_upscale;
   }
-  if (apply_downscale == 1)
+  if (apply_downscale >= 0)
   {
-    header.processing_type |= PROCESSING_TYPE_DOWNSCALE;
+    header.downscale_multiplier = apply_downscale;
   }
 
 
   char buffer[MAX_LINE_SIZE + 1];
   memset(buffer, 0, sizeof(buffer));
 
-  char response[3];
+  char response[6];
   memset(response, 0, sizeof(response));
 
   send(client_socket_fd, &header, sizeof(header), 0u);
 
+  // SEND
   size_t read_count = 0;
   while (read_count = read(file_fd, buffer, MAX_LINE_SIZE))
   {
@@ -115,15 +116,40 @@ int main(int argc, char* argv[], char* envp[])
 RESEND:
     send(client_socket_fd, buffer, read_count, 0u);
 
-    recv(client_socket_fd, response, MAX_LINE_SIZE, 0);
+    recv(client_socket_fd, response, sizeof(response), 0);
 
-    if (strncmp(response, "OK", sizeof(response)) != 0)
+    if (strncmp(response, "SV_OK", sizeof(response)) != 0)
     {
       printf("[ERROR] Error while sending packet\n");
       goto RESEND;
     }
 
     memset(buffer, 0, sizeof(buffer));
+  }
+
+  send(client_socket_fd, "CL_TR_DONE", sizeof("CL_TR_DONE"), 0u);
+
+  // RECEIVE
+  while(1)
+  {
+    memset(buffer, 0, sizeof(buffer));
+
+    int recv_size = recv(client_socket_fd, buffer, MAX_LINE_SIZE + 1, 0);
+    
+    char* newName = malloc(strlen(file_path) + sizeof("processed_"));
+
+    strcpy(newName, "processsed_");
+
+    strcat(newName, file_path);
+
+    int fd =  open(newName, O_RDWR | O_CREAT | O_APPEND, S_IWUSR | S_IWGRP | S_IWOTH | S_IRUSR | S_IRGRP | S_IROTH);
+
+    write(fd, buffer, recv_size);
+
+    close(fd);
+
+    send(client_socket_fd, "CL_OK", sizeof("CL_OK"), 0);
+
   }
 
   close(client_socket_fd);

@@ -10,19 +10,17 @@
 #include "tcp_handler.hpp"
 #include "udp_handler.hpp"
 
-int max(int x, int y) { if (x > y) return x; else return y; }
+#include "common_types.h"
+#include "my_timer.hpp"
 
-typedef struct tcp_connection
-{
-  pid_t child_pid;
-  int timeout;
-  int status;
-}tcp_connection_t;
+#include "pthread.h"
+
+int max(int x, int y) { if (x > y) return x; else return y; }
 
 extern char** environ;
 
 tcp_connection_t* connections;
-int current_connections = 0;
+int current_connection_idx = 0;
 
 int main(int argc, char* argv[], char* envp[])
 {
@@ -36,6 +34,11 @@ int main(int argc, char* argv[], char* envp[])
   }
 
   connections = (tcp_connection_t*)malloc(MAX_TCP_CONNECTIONS*(sizeof(tcp_connection_t)));
+  for (int i = 0; i < MAX_TCP_CONNECTIONS; i++)
+  {
+    connections[i].ip_addr = (char*)malloc(sizeof("255.255.255.255"));
+    memset(connections[i].ip_addr, 0, sizeof("255.255.255.255"));
+  }
 
   int server_socket_fd_tcp, server_socket_fd_udp;
   int client_socket_fd, client_len;
@@ -104,11 +107,22 @@ int main(int argc, char* argv[], char* envp[])
     {
       pid_t child_pid = -1;
 
-      if ( (child_pid = tcp_create_handler(server_socket_fd_tcp)) == -1)
+      if ( (child_pid = tcp_create_handler(server_socket_fd_tcp, current_connection_idx)) == -1)
       {
         printf("Error creating TCP handler!\n");
         exit(EXIT_FAILURE);
       }
+
+      pthread_t thread;
+
+      int temp = current_connection_idx;
+      pthread_create(&thread, NULL, my_timer, (void*)(&temp));
+
+      connections[current_connection_idx].child_pid = child_pid;
+      connections[current_connection_idx].timing_thread = thread;
+
+      current_connection_idx++;
+
     }
 
     if(FD_ISSET(server_socket_fd_udp, &file_descriptor_set))

@@ -14,4 +14,7 @@ mkdir -p bin
 
 mv -f ./build/client/user ./bin/user.app
 mv -f ./build/client/admin ./bin/admin.app
+mv -f ./build/client/gui ./bin/gui.app
 mv -f ./build/server/server ./bin/server.app
+cp -f ./client/python_client/python_user.py ./bin/python_user.py
+cp -f ./client/python_client/python_gui.py ./bin/python_gui.py
