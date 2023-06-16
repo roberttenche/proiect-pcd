@@ -26,6 +26,7 @@ int main(int argc, char* argv[], char* envp[])
 {
 
   system("mkdir -p server/");
+  system("touch banned_ips.txt");
 
   if (init_sig_handlers() == -1)
   {
@@ -36,8 +37,11 @@ int main(int argc, char* argv[], char* envp[])
   connections = (tcp_connection_t*)malloc(MAX_TCP_CONNECTIONS*(sizeof(tcp_connection_t)));
   for (int i = 0; i < MAX_TCP_CONNECTIONS; i++)
   {
-    connections[i].ip_addr = (char*)malloc(sizeof("255.255.255.255"));
+    connections[i].child_pid = 0;
+    connections[i].child_pipe = 0;
     memset(connections[i].ip_addr, 0, sizeof("255.255.255.255"));
+    connections[i].lifetime = 0;
+    connections[i].timing_thread = 0;
   }
 
   int server_socket_fd_tcp, server_socket_fd_udp;
@@ -112,22 +116,37 @@ int main(int argc, char* argv[], char* envp[])
         printf("Error creating TCP handler!\n");
         exit(EXIT_FAILURE);
       }
+      else if (child_pid == -2)
+      {
+        printf("Encounctered blocked IP\n");
+      }
+      else if (child_pid >= 1)
+      {
+        pthread_t thread;
 
-      pthread_t thread;
+        int temp = current_connection_idx;
+        pthread_create(&thread, NULL, my_timer, (void*)(&temp));
 
-      int temp = current_connection_idx;
-      pthread_create(&thread, NULL, my_timer, (void*)(&temp));
+        connections[current_connection_idx].child_pid = child_pid;
+        connections[current_connection_idx].timing_thread = thread;
 
-      connections[current_connection_idx].child_pid = child_pid;
-      connections[current_connection_idx].timing_thread = thread;
-
-      current_connection_idx++;
+        current_connection_idx++;
+      }
+      else
+      {
+        printf("Error creating TCP handler!\n");
+        exit(EXIT_FAILURE);
+      }
 
     }
 
-    if(FD_ISSET(server_socket_fd_udp, &file_descriptor_set))
+    if(FD_ISSET(server_socket_fd_udp, &file_descriptor_set) && admin_connected == false)
     {
-      udp_handle(server_socket_fd_udp);
+      if (udp_handler(server_socket_fd_udp) > 0)
+      {
+        admin_connected = true;
+      }
+
     }
 
     interrupted_by_sig_handler = false;

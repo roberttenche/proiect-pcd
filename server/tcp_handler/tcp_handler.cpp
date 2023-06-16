@@ -18,6 +18,8 @@
 
 extern tcp_connection_t* connections;
 
+static void sigusr1_handler(int sig_num, siginfo_t* si, void* ignored);
+
 pid_t tcp_create_handler(int server_socket_fd_tcp, int current_connection_idx)
 {
   struct sockaddr_in client_addr;
@@ -45,12 +47,53 @@ pid_t tcp_create_handler(int server_socket_fd_tcp, int current_connection_idx)
     exit(EXIT_FAILURE);
   }
 
+  printf("Incoming connection from IP: %s\n", client_ip);
+
+  int fd = open("banned_ips.txt", O_RDONLY);
+
+  char blocked_ip[15];
+  memset(blocked_ip, 0, sizeof(blocked_ip));
+
+  char c;
+  int idx = 0;
+  while (read(fd, &c, 1) == 1)
+  {
+    if (c == '\n')
+    {
+      if (strncmp(blocked_ip, client_ip, 15) == 0)
+      {
+        close(client_fd);
+        close(pipe_fd[0]);
+        close(pipe_fd[1]);
+        close(fd);
+        return -2;
+      }
+      memset(blocked_ip, 0, sizeof(blocked_ip));
+      idx = 0;
+    }
+    else
+    {
+      blocked_ip[idx++] = c;
+    }
+  }
+  
+
+  close(fd);
+
+
   strcpy(connections[current_connection_idx].ip_addr, client_ip);
 
   pid_t child_pid = fork();
 
   if (child_pid == 0)
   {
+    // SIGUSR1
+    struct sigaction sa_SIGUSR1;
+    memset(&sa_SIGUSR1, 0, sizeof(sa_SIGUSR1));
+    sa_SIGUSR1.sa_sigaction = sigusr1_handler;
+    sa_SIGUSR1.sa_flags = SA_SIGINFO;
+    sigaction(SIGUSR1, &sa_SIGUSR1, NULL);
+    
     close(pipe_fd[0]);
 
     close(server_socket_fd_tcp);
@@ -165,4 +208,23 @@ pid_t tcp_create_handler(int server_socket_fd_tcp, int current_connection_idx)
 
   return child_pid;
 
+}
+
+static void sigusr1_handler(int sig_num, siginfo_t* si, void* ignored)
+{
+  switch (si->si_code)
+  {
+  case SI_USER: // signal received via kill()
+  {
+    kill(getppid(), SIGUSR1);
+    kill(getpid(), SIGKILL);
+    break;
+  }
+
+  default:
+  {
+    printf("ERROR PROCESSING SINGAL: %d", sig_num);
+    break;
+  }
+  }
 }

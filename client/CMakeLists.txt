@@ -15,15 +15,12 @@ target_link_directories(user PRIVATE
 target_link_libraries(user PRIVATE
 )
 
-### ADMIN ###
-add_executable(admin
-  admin/admin.c
-)
-
 ### GUI ###
 add_executable(gui
   gui/gui.c
   gui/user_shell.c
+  gui/admin_shell.c
+
 )
 
 target_link_directories(gui PRIVATE

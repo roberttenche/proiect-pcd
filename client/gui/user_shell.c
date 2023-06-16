@@ -8,7 +8,7 @@
 
 #include <pthread.h>
 
-void flushInputBuffer() {
+static void fflush_stdin() {
   char c;
   while ((c = getchar()) != '\n' && c != EOF) {}
 }
@@ -25,7 +25,7 @@ typedef struct file_s
 
 int user_shell()
 {
-  flushInputBuffer();
+  fflush_stdin();
 
   int file_idx = -1;
   file_t files[50];

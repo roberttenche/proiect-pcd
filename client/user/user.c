@@ -138,7 +138,7 @@ RESEND:
     
     char* newName = malloc(strlen(file_path) + sizeof("processed_"));
 
-    strcpy(newName, "processsed_");
+    strcpy(newName, "processed_");
 
     strcat(newName, file_path);
 

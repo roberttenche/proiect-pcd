@@ -35,6 +35,9 @@
     "sstream": "c",
     "chrono": "c",
     "algorithm": "c",
-    "pthread.h": "c"
+    "pthread.h": "c",
+    "wait.h": "c",
+    "types.h": "c",
+    "netfwd": "cpp"
   }
 }

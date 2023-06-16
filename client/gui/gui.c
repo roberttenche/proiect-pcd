@@ -3,6 +3,7 @@
 #include <sys/wait.h>
 
 #include "user_shell.h"
+#include "admin_shell.h"
 
 int main()
 {
@@ -13,7 +14,7 @@ int main()
     printf("Main Menu\n");
     printf("1. User\n");
     printf("2. Admin\n");
-    printf("2. Exit\n");
+    printf("3. Exit\n");
     printf("Enter your choice (1-3): ");
     scanf("%d", &choice);
 
@@ -23,8 +24,7 @@ int main()
         break;
 
       case 2:
-        printf("You selected Admin\n");
-        // Add your code for Option 2 here
+        admin_shell();
         break;
 
       case 3:
